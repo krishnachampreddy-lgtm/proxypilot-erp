@@ -1,0 +1,14 @@
+[build]
+  command = "npm run build"
+  publish = "client/dist"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+  included_files = ["netlify/database/migrations/*.sql"]
+
+# React Router: send every page to index.html (the /api/* function is matched first)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

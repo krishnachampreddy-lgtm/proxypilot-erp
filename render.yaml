@@ -1,0 +1,29 @@
+# One-click setup on Render: New -> Blueprint -> pick this repo.
+# The database is a free Neon Postgres (it doesn't expire): paste its connection string as DATABASE_URL.
+services:
+  - type: web
+    name: proxypilot-erp
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: node server/src/index.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: GEMINI_MODEL
+        value: gemini-2.5-flash
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: BREVO_API_KEY
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        value: 306617167776-heqrug9v4vj9bctbtd7nn3bnhdnclej5.apps.googleusercontent.com

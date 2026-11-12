@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Demo School ERP</title>
+<style>
+  :root {
+    --bg: #eef1f6; --card: #fff; --ink: #1d2433; --muted: #667085; --line: #dfe3ea;
+    --blue: #2f5bea; --blue-soft: #e8eefd; --green: #12805c; --green-soft: #e3f4ec;
+    --amber: #a1640a; --amber-soft: #fbf0dc; --red: #b42318; --red-soft: #fde8e7; --slate-soft: #eef0f3;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header { background: #16213e; color: #fff; }
+  .bar { max-width: 1180px; margin: 0 auto; padding: 14px 16px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .logo { width: 34px; height: 34px; border-radius: 9px; background: linear-gradient(135deg, #4f7cff, #2f5bea); display: grid; place-items: center; font-weight: 800; }
+  .title { font-size: 17px; font-weight: 700; }
+  .sub { font-size: 12px; color: #b9c3dc; }
+  .demo { margin-left: auto; font-size: 11px; font-weight: 700; letter-spacing: .06em; background: #ffcc4d; color: #3d2b00; padding: 4px 9px; border-radius: 999px; }
+  main { max-width: 1180px; margin: 0 auto; padding: 18px 16px 40px; display: grid; gap: 16px; }
+  .status { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 10px; background: var(--card); border: 1px solid var(--line); flex-wrap: wrap; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: #9aa3b2; flex: none; }
+  .dot.on { background: #12b76a; box-shadow: 0 0 0 4px #d1fadf; }
+  .grid { display: grid; grid-template-columns: 1fr 1.15fr; gap: 16px; }
+  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px; min-width: 0; }
+  h2 { font-size: 15px; margin: 0 0 4px; }
+  .hint { color: var(--muted); font-size: 12.5px; margin: 0 0 12px; }
+  label { display: block; font-size: 12px; font-weight: 600; color: #344054; margin: 10px 0 4px; }
+  select, input[type=date], input[type=text] { width: 100%; padding: 8px 10px; border: 1px solid #cfd5df; border-radius: 8px; font: inherit; background: #fff; color: var(--ink); }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .check { display: flex; gap: 8px; align-items: flex-start; margin-top: 12px; font-size: 13px; }
+  .check input { margin-top: 3px; }
+  button { margin-top: 14px; background: var(--blue); color: #fff; border: 0; border-radius: 8px; padding: 9px 16px; font: inherit; font-weight: 600; cursor: pointer; }
+  button:disabled { opacity: .5; cursor: default; }
+  .msg { margin-top: 10px; font-size: 13px; padding: 8px 10px; border-radius: 8px; display: none; }
+  .msg.ok { display: block; background: var(--green-soft); color: var(--green); }
+  .msg.err { display: block; background: var(--red-soft); color: var(--red); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); font-weight: 600; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+  td { padding: 8px; border-bottom: 1px solid #eef0f4; vertical-align: top; }
+  .scroll { overflow-x: auto; }
+  .feed { display: grid; gap: 8px; max-height: 520px; overflow-y: auto; }
+  .item { border: 1px solid #e7eaf0; border-radius: 10px; padding: 10px 12px; }
+  .item .top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .tag { font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 6px; font-family: ui-monospace, Menlo, Consolas, monospace; }
+  .t-cover-assigned { background: var(--green-soft); color: var(--green); }
+  .t-cover-passed { background: var(--amber-soft); color: var(--amber); }
+  .t-cover-failed, .t-leave-declined { background: var(--red-soft); color: var(--red); }
+  .t-leave-approved { background: var(--blue-soft); color: var(--blue); }
+  .t-ping { background: var(--slate-soft); color: #475467; }
+  .when { margin-left: auto; color: var(--muted); font-size: 12px; }
+  .ver { font-size: 11.5px; margin-top: 4px; }
+  .ver.ok { color: var(--green); } .ver.no { color: var(--red); }
+  .text { margin-top: 4px; }
+  .pill { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+  .p-accepted { background: var(--green-soft); color: var(--green); }
+  .p-pending { background: var(--amber-soft); color: var(--amber); }
+  .p-uncovered { background: var(--red-soft); color: var(--red); }
+  .empty { color: var(--muted); font-size: 13px; padding: 14px; text-align: center; border: 1px dashed var(--line); border-radius: 10px; }
+  .stats { display: flex; gap: 18px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
+  .stats b { color: var(--ink); font-size: 16px; display: block; }
+  a { color: var(--blue); }
+  code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; background: #f2f4f7; padding: 1px 5px; border-radius: 5px; white-space: nowrap; }
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <div class="logo">E</div>
+    <div>
+      <div class="title">Demo School ERP</div>
+      <div class="sub">Staff · Timetable · Leave</div>
+    </div>
+    <span class="demo">DEMO — STANDS IN FOR YOUR SCHOOL'S ERP</span>
+  </div>
+</header>
+
+<main>
+  <div class="status" id="status"><span class="dot"></span><span>Loading…</span></div>
+
+  <div class="card">
+    <h2>What this ERP shares with ProxyPilot</h2>
+    <p class="hint">ProxyPilot reads this data from the ERP's API when the HOD presses “Sync now”.</p>
+    <div class="stats" id="stats"></div>
+  </div>
+
+  <div class="grid">
+    <div style="display:grid; gap:16px; align-content:start">
+      <div class="card">
+        <h2>Apply for leave in the ERP</h2>
+        <p class="hint">The ERP sends it straight to ProxyPilot, which finds substitutes for every class.</p>
+        <form id="form">
+          <label for="teacher">Teacher</label>
+          <select id="teacher" required></select>
+          <div class="row">
+            <div><label for="from">From</label><input type="date" id="from" required></div>
+            <div><label for="to">To</label><input type="date" id="to"></div>
+          </div>
+          <label for="session">Leave for</label>
+          <select id="session">
+            <option value="full">Full day</option>
+            <option value="morning">Morning (P1–P4)</option>
+            <option value="afternoon">Afternoon (P5–P6)</option>
+          </select>
+          <label for="reason">Reason</label>
+          <input type="text" id="reason" maxlength="120" value="Fever, doctor advised rest">
+          <div class="check">
+            <input type="checkbox" id="approved" checked>
+            <label for="approved" style="margin:0;font-weight:500">Already approved in the ERP — ProxyPilot starts finding substitutes at once (untick to send it to the HOD in ProxyPilot first)</label>
+          </div>
+          <button id="send" type="submit">Send to ProxyPilot</button>
+          <div class="msg" id="msg"></div>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>Leaves sent to ProxyPilot</h2>
+        <div class="scroll"><table><thead><tr><th>ERP ref</th><th>Teacher</th><th>Dates</th><th>ProxyPilot</th></tr></thead><tbody id="leaves"></tbody></table></div>
+      </div>
+    </div>
+
+    <div style="display:grid; gap:16px; align-content:start">
+      <div class="card">
+        <h2>Today's substitutes</h2>
+        <p class="hint">Filled in by ProxyPilot's updates — the ERP timetable always shows who is taking each class.</p>
+        <div class="scroll"><table><thead><tr><th>Period</th><th>Class</th><th>Absent</th><th>Substitute</th></tr></thead><tbody id="covers"></tbody></table></div>
+      </div>
+      <div class="card">
+        <h2>Updates from ProxyPilot</h2>
+        <p class="hint">Every update arrives signed. The ERP checks the signature before trusting it.</p>
+        <div class="feed" id="feed"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const ago = (t) => {
+    const s = Math.max(0, Math.round((Date.now() - new Date(t)) / 1000));
+    if (s < 60) return `${s}s ago`;
+    if (s < 3600) return `${Math.round(s / 60)} min ago`;
+    return new Date(t).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
+  };
+  const pretty = (d) => new Date(`${d}T00:00:00Z`).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' });
+  let filled = false;
+  const SESSION = { full: 'Full day', morning: 'Morning', afternoon: 'Afternoon' };
+
+  function line(m) {
+    const d = m.body?.data || {};
+    const who = (p) => (p?.name ? esc(p.name) : '—');
+    switch (m.event) {
+      case 'cover.assigned': return `<b>${who(d.substitute)}</b> will take ${esc(d.className)} · P${d.period} ${esc(d.subject)} on ${pretty(d.date)}, covering for ${who(d.absentTeacher)}.`;
+      case 'cover.passed': return `${esc(d.className)} · P${d.period} on ${pretty(d.date)} passed on — now asking <b>${who(d.askedNow)}</b>.`;
+      case 'cover.failed': return `Nobody could take ${esc(d.className)} · P${d.period} on ${pretty(d.date)}.`;
+      case 'leave.approved': return `Leave approved for <b>${who(d.teacher)}</b> (${(d.dates || []).map(pretty).join(', ')}). Finding cover for ${(d.classes || []).length} class${(d.classes || []).length === 1 ? '' : 'es'}.`;
+      case 'leave.declined': return `Leave declined for <b>${who(d.teacher)}</b> (${(d.dates || []).map(pretty).join(', ')}).${d.note ? ` ${esc(d.note)}` : ''}`;
+      case 'ping': return esc(d.message || 'Test message');
+      default: return esc(m.event);
+    }
+  }
+
+  async function load() {
+    let s;
+    try { s = await fetch('/demo-erp/api/state').then((r) => r.json()); } catch { return; }
+    $('status').innerHTML = s.connected
+      ? `<span class="dot on"></span><span>Connected to <b>ProxyPilot</b> at <code>${esc(s.proxypilotUrl)}</code></span>`
+      : `<span class="dot"></span><span>Not connected. In ProxyPilot, log in as the HOD → <b>School ERP</b> → <b>Connect the demo ERP</b>.</span>`;
+    $('send').disabled = !s.connected;
+    $('stats').innerHTML = [['Teachers', s.school.teachers], ['Students', s.school.students], ['Classes', s.school.classes], ['Periods a week', s.school.periods]]
+      .map(([k, v]) => `<div><b>${v}</b>${k}</div>`).join('');
+
+    if (!filled) {
+      $('teacher').innerHTML = s.teachers.map((t) => `<option value="${esc(t.erpId)}">${esc(t.name)} — ${esc(t.subjects.join(', '))} (${esc(t.erpId)})</option>`).join('');
+      $('from').value = s.today;
+      $('from').min = s.today;
+      $('to').min = s.today;
+      filled = true;
+    }
+
+    $('leaves').innerHTML = s.leaves.length
+      ? s.leaves.map((l) => {
+          const t = s.teachers.find((x) => x.erpId === l.teacher_erp_id);
+          const dates = l.end_date && l.end_date !== l.date ? `${pretty(l.date)} – ${pretty(l.end_date)}` : pretty(l.date);
+          return `<tr><td><code>${esc(l.ref)}</code></td><td>${esc(t?.name || l.teacher_erp_id)}</td><td>${dates}<div style="color:var(--muted);font-size:12px">${esc(SESSION[l.session] || l.session)}${l.approved_in_erp ? ' · approved in the ERP' : ' · sent to the HOD'}</div></td><td><span class="pill ${l.proxypilot_status === 'approved' ? 'p-accepted' : l.proxypilot_status === 'declined' || l.proxypilot_status === 'rejected' ? 'p-uncovered' : 'p-pending'}">${esc(l.proxypilot_status === 'pending' ? 'waiting for HOD' : l.proxypilot_status)}</span></td></tr>`;
+        }).join('')
+      : `<tr><td colspan="4"><div class="empty">No leaves sent yet.</div></td></tr>`;
+
+    $('covers').innerHTML = s.todayCovers.length
+      ? s.todayCovers.map((c) => {
+          const sub = c.status === 'accepted' ? `<b>${esc(c.substitute?.name)}</b> <span class="pill p-accepted">covered</span>`
+            : c.status === 'uncovered' ? `<span class="pill p-uncovered">not covered</span>`
+            : `asking ${esc(c.askedNow?.name || '…')} <span class="pill p-pending">waiting</span>`;
+          return `<tr><td>P${c.period}${c.time ? `<div style="color:var(--muted);font-size:12px">${esc(c.time)}</div>` : ''}</td><td>${esc(c.className)}<div style="color:var(--muted);font-size:12px">${esc(c.subject)}</div></td><td>${esc(c.absentTeacher?.name)}</td><td>${sub}</td></tr>`;
+        }).join('')
+      : `<tr><td colspan="4"><div class="empty">No teacher is away today.</div></td></tr>`;
+
+    $('feed').innerHTML = s.inbox.length
+      ? s.inbox.map((m) => `
+        <div class="item">
+          <div class="top"><span class="tag t-${esc(m.event.replace('.', '-'))}">${esc(m.event)}</span><span class="when">${ago(m.received_at)}</span></div>
+          <div class="text">${line(m)}</div>
+          <div class="ver ${m.verified ? 'ok' : 'no'}">${m.verified ? '✓ Signature verified' : '✗ Signature did not match — ignored'}</div>
+        </div>`).join('')
+      : `<div class="empty">No updates yet. Apply for a leave, or approve one in ProxyPilot.</div>`;
+  }
+
+  $('form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const msg = $('msg');
+    msg.className = 'msg';
+    $('send').disabled = true;
+    try {
+      const r = await fetch('/demo-erp/api/apply-leave', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          teacherErpId: $('teacher').value, date: $('from').value, endDate: $('to').value || $('from').value,
+          session: $('session').value, reason: $('reason').value, approvedInErp: $('approved').checked,
+        }),
+      });
+      const j = await r.json();
+      if (j.ok) {
+        const covers = j.proxypilot?.covers?.length || 0;
+        msg.textContent = j.proxypilot?.status === 'no-classes'
+          ? `${j.ref}: ${j.proxypilot.message}`
+          : `${j.ref} sent. ProxyPilot: ${j.proxypilot?.status || 'received'}${covers ? ` — finding substitutes for ${covers} class${covers === 1 ? '' : 'es'}` : ''}.`;
+        msg.className = 'msg ok';
+      } else {
+        msg.textContent = `Not sent: ${j.proxypilot?.error || j.error || 'ProxyPilot refused it'}`;
+        msg.className = 'msg err';
+      }
+    } catch {
+      msg.textContent = 'Could not reach the ERP server.';
+      msg.className = 'msg err';
+    }
+    $('send').disabled = false;
+    load();
+  });
+
+  load();
+  setInterval(load, 3000);
+</script>
+</body>
+</html>

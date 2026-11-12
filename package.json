@@ -1,0 +1,31 @@
+{
+  "name": "proxypilot-erp",
+  "version": "1.0.0",
+  "description": "ProxyPilot ERP edition - proxy-lecture automation that plugs into a school ERP",
+  "scripts": {
+    "build": "npm --prefix client install && npm --prefix client run build",
+    "dev:api": "node --watch server/src/index.js",
+    "dev:web": "npm --prefix client run dev",
+    "seed": "node server/src/seed.js",
+    "dev:local": "node scripts/local-db.mjs"
+  },
+  "dependencies": {
+    "@google/genai": "^2.28.0",
+    "@netlify/database": "^2.0.1",
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^18.0.6",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "nodemailer": "^10.0.16",
+    "pg": "^8.23.1",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@netlify/database-dev": "^1.0.1"
+  },
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20.12"
+  }
+}
