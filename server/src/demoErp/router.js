@@ -5,6 +5,8 @@ import { q } from '../db.js';
 import { buildSchool } from '../seedData.js';
 import { seal, unseal, sha256, sameHash, signBody, getConnection } from '../services/erp.js';
 import { todayIST } from '../services/dates.js';
+import { signToken } from '../middleware/auth.js';
+import { publicUser } from '../routes/auth.js';
 
 /*
   Demo School ERP — a tiny stand-in for a real school ERP (Teachmint, Entab, Fedena…),
@@ -42,6 +44,25 @@ async function active() {
 }
 
 router.get('/', (req, res) => res.sendFile(path.join(here, 'page.html')));
+
+// Demo shortcut: open ProxyPilot as the teacher who was asked to cover, so the
+// presenter can show her saying yes. Only for the built-in demo teachers (their
+// shared password is already public on the login page) and only in demo mode.
+router.get('/as/:erpId', async (req, res) => {
+  const cfg = await active();
+  const [u] = cfg
+    ? await q(`SELECT * FROM users WHERE erp_id = $1 AND role = 'faculty' AND email LIKE '%@college.edu'`, [String(req.params.erpId).slice(0, 40)])
+    : [];
+  if (!u) return res.redirect('/demo-erp');
+  const session = JSON.stringify({ token: signToken(u), user: publicUser(u) }).replace(/</g, '\\u003c');
+  res.set('Cache-Control', 'no-store').type('html').send(`<!doctype html><meta charset="utf-8"><title>Opening ProxyPilot…</title>
+<body style="background:#07100c;color:#edf2ec;font:15px system-ui;display:grid;place-items:center;height:100vh;margin:0">Opening ProxyPilot as ${u.name.replace(/[<>&"]/g, '')}…
+<script>
+  const s = ${session};
+  try { localStorage.setItem('pp_token', s.token); localStorage.setItem('pp_user', JSON.stringify(s.user)); } catch (e) {}
+  location.replace('/faculty');
+</script></body>`);
+});
 
 const api = Router();
 // (no JSON parser for the whole API: the webhook needs the raw body to check its signature)
@@ -138,7 +159,7 @@ api.get('/state', async (req, res) => {
 // a teacher applies for leave in the ERP -> the ERP sends it to ProxyPilot's API
 api.post('/apply-leave', express.json({ limit: '20kb' }), async (req, res) => {
   const cfg = await active();
-  if (!cfg) return res.status(409).json({ error: 'Connect the demo ERP from ProxyPilot first (HOD › School ERP).' });
+  if (!cfg) return res.status(409).json({ error: 'Link the demo school from ProxyPilot first (HOD › School ERP › Try with a demo school).' });
   const b = req.body || {};
   const [{ n }] = await q('SELECT COUNT(*)::int AS n FROM demo_erp_leaves');
   const ref = `LV-${1001 + n}-${Date.now().toString(36).slice(-3).toUpperCase()}`;

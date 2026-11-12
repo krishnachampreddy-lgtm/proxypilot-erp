@@ -3,209 +3,323 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#07100c">
 <title>Demo School ERP</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <style>
+  /* Same look as ProxyPilot: the school campus behind frosted glass, chalk-white text, pencil-yellow accent */
   :root {
-    --bg: #eef1f6; --card: #fff; --ink: #1d2433; --muted: #667085; --line: #dfe3ea;
-    --blue: #2f5bea; --blue-soft: #e8eefd; --green: #12805c; --green-soft: #e3f4ec;
-    --amber: #a1640a; --amber-soft: #fbf0dc; --red: #b42318; --red-soft: #fde8e7; --slate-soft: #eef0f3;
+    --ink: #edf2ec; --muted: #94a59b; --paper: #07100c; --paper-2: #14201a; --line: #2a3a32;
+    --field: rgb(11 20 16 / 0.62);
+    --brass: #f4c542; --brass-soft: #2e2912; --sage: #62d39b; --sage-soft: #11291d; --clay: #f07a62; --clay-soft: #301812;
+    --sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+    --serif: "Instrument Serif", Georgia, serif;
+    --mono: "Geist Mono", ui-monospace, Menlo, Consolas, monospace;
   }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-  header { background: #16213e; color: #fff; }
-  .bar { max-width: 1180px; margin: 0 auto; padding: 14px 16px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
-  .logo { width: 34px; height: 34px; border-radius: 9px; background: linear-gradient(135deg, #4f7cff, #2f5bea); display: grid; place-items: center; font-weight: 800; }
-  .title { font-size: 17px; font-weight: 700; }
-  .sub { font-size: 12px; color: #b9c3dc; }
-  .demo { margin-left: auto; font-size: 11px; font-weight: 700; letter-spacing: .06em; background: #ffcc4d; color: #3d2b00; padding: 4px 9px; border-radius: 999px; }
-  main { max-width: 1180px; margin: 0 auto; padding: 18px 16px 40px; display: grid; gap: 16px; }
-  .status { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 10px; background: var(--card); border: 1px solid var(--line); flex-wrap: wrap; }
-  .dot { width: 9px; height: 9px; border-radius: 50%; background: #9aa3b2; flex: none; }
-  .dot.on { background: #12b76a; box-shadow: 0 0 0 4px #d1fadf; }
-  .grid { display: grid; grid-template-columns: 1fr 1.15fr; gap: 16px; }
-  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px; min-width: 0; }
-  h2 { font-size: 15px; margin: 0 0 4px; }
-  .hint { color: var(--muted); font-size: 12.5px; margin: 0 0 12px; }
-  label { display: block; font-size: 12px; font-weight: 600; color: #344054; margin: 10px 0 4px; }
-  select, input[type=date], input[type=text] { width: 100%; padding: 8px 10px; border: 1px solid #cfd5df; border-radius: 8px; font: inherit; background: #fff; color: var(--ink); }
-  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .check { display: flex; gap: 8px; align-items: flex-start; margin-top: 12px; font-size: 13px; }
-  .check input { margin-top: 3px; }
-  button { margin-top: 14px; background: var(--blue); color: #fff; border: 0; border-radius: 8px; padding: 9px 16px; font: inherit; font-weight: 600; cursor: pointer; }
-  button:disabled { opacity: .5; cursor: default; }
-  .msg { margin-top: 10px; font-size: 13px; padding: 8px 10px; border-radius: 8px; display: none; }
-  .msg.ok { display: block; background: var(--green-soft); color: var(--green); }
-  .msg.err { display: block; background: var(--red-soft); color: var(--red); }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); font-weight: 600; padding: 6px 8px; border-bottom: 1px solid var(--line); }
-  td { padding: 8px; border-bottom: 1px solid #eef0f4; vertical-align: top; }
-  .scroll { overflow-x: auto; }
-  .feed { display: grid; gap: 8px; max-height: 520px; overflow-y: auto; }
-  .item { border: 1px solid #e7eaf0; border-radius: 10px; padding: 10px 12px; }
-  .item .top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .tag { font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 6px; font-family: ui-monospace, Menlo, Consolas, monospace; }
-  .t-cover-assigned { background: var(--green-soft); color: var(--green); }
-  .t-cover-passed { background: var(--amber-soft); color: var(--amber); }
-  .t-cover-failed, .t-leave-declined { background: var(--red-soft); color: var(--red); }
-  .t-leave-approved { background: var(--blue-soft); color: var(--blue); }
-  .t-ping { background: var(--slate-soft); color: #475467; }
-  .when { margin-left: auto; color: var(--muted); font-size: 12px; }
-  .ver { font-size: 11.5px; margin-top: 4px; }
-  .ver.ok { color: var(--green); } .ver.no { color: var(--red); }
-  .text { margin-top: 4px; }
-  .pill { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
-  .p-accepted { background: var(--green-soft); color: var(--green); }
-  .p-pending { background: var(--amber-soft); color: var(--amber); }
-  .p-uncovered { background: var(--red-soft); color: var(--red); }
-  .empty { color: var(--muted); font-size: 13px; padding: 14px; text-align: center; border: 1px dashed var(--line); border-radius: 10px; }
-  .stats { display: flex; gap: 18px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
-  .stats b { color: var(--ink); font-size: 16px; display: block; }
-  a { color: var(--blue); }
-  code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; background: #f2f4f7; padding: 1px 5px; border-radius: 5px; white-space: nowrap; }
+  html, body { min-height: 100%; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 15px/1.5 var(--sans); -webkit-font-smoothing: antialiased; }
+  input, select, button { font: inherit; color-scheme: dark; }
+
+  .bg { position: fixed; inset: 0; z-index: -2; overflow: hidden;
+        background: radial-gradient(ellipse at 70% 20%, rgb(244 197 66 / .18), transparent 55%), radial-gradient(ellipse at 20% 80%, rgb(98 211 155 / .12), transparent 60%), linear-gradient(180deg, #16263a 0%, #1d3a2e 55%, #0a120e 100%); }
+  .bg img { width: 100%; height: 100%; object-fit: cover; animation: drift 60s ease-in-out infinite alternate; opacity: 0; transition: opacity 1.2s; }
+  .bg img.on { opacity: 1; }
+  @keyframes drift { from { transform: scale(1.04); } to { transform: scale(1.12) translate3d(-1.5%, -1%, 0); } }
+  .wash { position: fixed; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(180deg, rgba(5,9,7,.35) 0%, rgba(5,9,7,.78) 38%, rgba(5,9,7,.9) 100%); }
+
+  .glass { background: rgb(6 11 9 / .5); border: 1px solid rgb(200 235 220 / .14); -webkit-backdrop-filter: blur(12px) saturate(1.1); backdrop-filter: blur(12px) saturate(1.1); }
+
+  header { position: sticky; top: 0; z-index: 5; border-width: 0 0 1px; }
+  .bar { max-width: 1120px; margin: 0 auto; padding: 12px 16px; display: flex; align-items: center; gap: 12px; }
+  .crest { width: 38px; height: 38px; flex: none; }
+  .name { font-weight: 600; font-size: 15px; line-height: 1.2; }
+  .sub { font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: .14em; color: var(--muted); }
+  @media (max-width: 420px) { .sub { display: none; } }
+  .chip { margin-left: auto; display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; font-size: 12.5px; padding: 6px 11px; border-radius: 999px; border: 1px solid var(--line); background: rgb(7 16 12 / .55); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex: none; }
+  .dot.on { background: var(--sage); box-shadow: 0 0 10px 2px rgba(98,211,155,.55); }
+
+  main { max-width: 1120px; margin: 0 auto; padding: 26px 16px 40px; }
+  .demo-tag { display: inline-block; font-family: var(--mono); font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); border: 1px solid rgb(244 197 66 / .4); background: rgb(46 41 18 / .6); padding: 3px 9px; border-radius: 999px; }
+  h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(2rem, 5vw, 2.9rem); line-height: 1.05; letter-spacing: -.01em; margin: 12px 0 8px; }
+  .lead { margin: 0; color: rgb(237 242 236 / .78); max-width: 640px; font-size: 15.5px; }
+
+  .grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.12fr); gap: 20px; margin-top: 24px; align-items: start; }
+  .col { display: grid; gap: 20px; }
+  @media (max-width: 880px) { .grid { grid-template-columns: 1fr; } }
+
+  .card { border-radius: 16px; padding: 20px; box-shadow: 0 18px 40px -24px rgba(0,0,0,.7); min-width: 0; }
+  .head { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
+  .num { width: 30px; height: 30px; border-radius: 50%; background: var(--brass); color: var(--paper); font: 600 13px var(--mono); display: grid; place-items: center; flex: none; }
+  h2 { font-family: var(--serif); font-weight: 400; font-size: 1.6rem; line-height: 1.15; margin: 0; }
+  .hint { color: var(--muted); font-size: 13.5px; margin: 4px 0 16px; }
+
+  label.f { display: block; font-size: 13.5px; font-weight: 500; margin: 14px 0 6px; }
+  select, input[type=date], input[type=text] { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--field); color: var(--ink); outline: none; }
+  select:focus, input:focus { border-color: var(--brass); }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .two label.f { margin-top: 0; }
+  .seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .seg label, .choice { position: relative; display: block; }
+  .seg input, .choice input { position: absolute; opacity: 0; pointer-events: none; }
+  .seg span { display: block; text-align: center; padding: 9px 6px; border-radius: 10px; border: 1px solid var(--line); background: var(--field); font-size: 13.5px; cursor: pointer; }
+  .seg input:checked + span { border-color: var(--brass); background: var(--brass-soft); color: var(--brass); font-weight: 600; }
+  .seg input:focus-visible + span, .choice input:focus-visible + span { outline: 2px solid var(--brass); outline-offset: 2px; }
+  .choices { display: grid; gap: 8px; }
+  .choice > span { display: flex; gap: 10px; align-items: flex-start; padding: 11px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--field); cursor: pointer; font-size: 14px; }
+  .choice > span::before { content: ""; width: 16px; height: 16px; margin-top: 2px; border-radius: 50%; border: 2px solid var(--muted); flex: none; }
+  .choice input:checked + span { border-color: var(--brass); background: var(--brass-soft); }
+  .choice input:checked + span::before { border-color: var(--brass); background: radial-gradient(circle, var(--brass) 0 4px, transparent 5px); }
+  .choice small { display: block; color: var(--muted); font-size: 12.5px; }
+  .send { margin-top: 18px; width: 100%; padding: 12px 16px; border: 0; border-radius: 12px; background: var(--brass); color: var(--paper); font-weight: 600; font-size: 15px; cursor: pointer; transition: filter .15s; }
+  .send:hover { filter: brightness(1.08); }
+  .send:disabled { opacity: .5; cursor: default; }
+  .msg { display: none; margin-top: 12px; padding: 11px 13px; border-radius: 12px; font-size: 14px; }
+  .msg.ok { display: block; background: var(--sage-soft); color: var(--sage); border: 1px solid rgb(98 211 155 / .3); }
+  .msg.err { display: block; background: var(--clay-soft); color: var(--clay); border: 1px solid rgb(240 122 98 / .3); }
+
+  .covers { display: grid; gap: 10px; }
+  .cover { display: grid; grid-template-columns: 58px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px; border-radius: 12px; border: 1px solid var(--line); background: rgb(7 16 12 / .5); }
+  .per { text-align: center; border-right: 1px solid var(--line); padding-right: 10px; }
+  .per b { display: block; font-family: var(--mono); font-size: 16px; }
+  .per span { font-size: 11.5px; color: var(--muted); }
+  .cls { font-weight: 600; }
+  .away { color: var(--muted); font-size: 13px; }
+  .who { text-align: right; }
+  .who .nm { font-size: 14px; }
+  .pill { display: inline-block; font: 500 11px var(--mono); letter-spacing: .06em; text-transform: uppercase; padding: 3px 8px; border-radius: 6px; white-space: nowrap; }
+  .p-ok { background: var(--sage-soft); color: var(--sage); }
+  .p-wait { background: var(--brass-soft); color: var(--brass); }
+  .p-no { background: var(--clay-soft); color: var(--clay); }
+  .p-mute { background: var(--paper-2); color: var(--muted); }
+  .as { display: inline-block; margin-top: 6px; font-size: 12.5px; font-weight: 600; color: var(--brass); text-decoration: none; border: 1px solid rgb(244 197 66 / .45); border-radius: 8px; padding: 4px 9px; }
+  .as:hover { background: var(--brass-soft); }
+  @media (max-width: 520px) {
+    .cover { grid-template-columns: 52px minmax(0, 1fr); }
+    .who { grid-column: 1 / -1; text-align: left; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; border-top: 1px dashed var(--line); padding-top: 10px; }
+    .who .as { margin-top: 0; }
+  }
+
+  .feed { display: grid; gap: 12px; max-height: 420px; overflow-y: auto; }
+  .item { display: grid; grid-template-columns: 10px minmax(0, 1fr); gap: 12px; }
+  .item .d { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; }
+  .item .t { font-size: 14px; line-height: 1.45; }
+  .item .m { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .ok-c { color: var(--sage); } .no-c { color: var(--clay); }
+  .leaves { display: grid; gap: 8px; }
+  .leave { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: rgb(7 16 12 / .5); }
+  .leave .when { color: var(--muted); font-size: 12.5px; }
+  .empty { color: var(--muted); font-size: 14px; padding: 18px 14px; text-align: center; border: 1px dashed var(--line); border-radius: 12px; }
+
+  .offline { margin-top: 24px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; }
+  .btn { display: inline-block; text-decoration: none; padding: 10px 16px; border-radius: 11px; font-weight: 600; font-size: 14px; background: var(--brass); color: var(--paper); }
+  footer { margin-top: 28px; text-align: center; color: var(--muted); font-size: 13px; }
+  footer a { color: var(--ink); }
+  [hidden] { display: none !important; }
+  @media (prefers-reduced-motion: reduce) { .bg img { animation: none; } }
 </style>
 </head>
 <body>
-<header>
+<div class="bg"><img id="bgimg" alt=""></div>
+<div class="wash"></div>
+
+<header class="glass">
   <div class="bar">
-    <div class="logo">E</div>
+    <svg class="crest" viewBox="0 0 40 40" aria-hidden="true">
+      <path d="M20 3 6 8v11c0 9 6 15 14 18 8-3 14-9 14-18V8Z" fill="#14201a" stroke="#f4c542" stroke-width="1.6"/>
+      <path d="M13 15h14M13 20h14M13 25h9" stroke="#edf2ec" stroke-opacity=".8" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>
     <div>
-      <div class="title">Demo School ERP</div>
-      <div class="sub">Staff · Timetable · Leave</div>
+      <div class="name">Demo School ERP</div>
+      <div class="sub">Pretend school software</div>
     </div>
-    <span class="demo">DEMO — STANDS IN FOR YOUR SCHOOL'S ERP</span>
+    <span class="chip" id="link"><span class="dot"></span>Checking…</span>
   </div>
 </header>
 
 <main>
-  <div class="status" id="status"><span class="dot"></span><span>Loading…</span></div>
+  <span class="demo-tag">Demo · stands in for your school’s own software</span>
+  <h1>A teacher is away? Enter the leave here.</h1>
+  <p class="lead">This is how the school office already works. ProxyPilot quietly finds a substitute, and this page shows who is covering each class, by itself.</p>
 
-  <div class="card">
-    <h2>What this ERP shares with ProxyPilot</h2>
-    <p class="hint">ProxyPilot reads this data from the ERP's API when the HOD presses “Sync now”.</p>
-    <div class="stats" id="stats"></div>
-  </div>
-
-  <div class="grid">
-    <div style="display:grid; gap:16px; align-content:start">
-      <div class="card">
-        <h2>Apply for leave in the ERP</h2>
-        <p class="hint">The ERP sends it straight to ProxyPilot, which finds substitutes for every class.</p>
-        <form id="form">
-          <label for="teacher">Teacher</label>
-          <select id="teacher" required></select>
-          <div class="row">
-            <div><label for="from">From</label><input type="date" id="from" required></div>
-            <div><label for="to">To</label><input type="date" id="to"></div>
-          </div>
-          <label for="session">Leave for</label>
-          <select id="session">
-            <option value="full">Full day</option>
-            <option value="morning">Morning (P1–P4)</option>
-            <option value="afternoon">Afternoon (P5–P6)</option>
-          </select>
-          <label for="reason">Reason</label>
-          <input type="text" id="reason" maxlength="120" value="Fever, doctor advised rest">
-          <div class="check">
-            <input type="checkbox" id="approved" checked>
-            <label for="approved" style="margin:0;font-weight:500">Already approved in the ERP — ProxyPilot starts finding substitutes at once (untick to send it to the HOD in ProxyPilot first)</label>
-          </div>
-          <button id="send" type="submit">Send to ProxyPilot</button>
-          <div class="msg" id="msg"></div>
-        </form>
-      </div>
-
-      <div class="card">
-        <h2>Leaves sent to ProxyPilot</h2>
-        <div class="scroll"><table><thead><tr><th>ERP ref</th><th>Teacher</th><th>Dates</th><th>ProxyPilot</th></tr></thead><tbody id="leaves"></tbody></table></div>
-      </div>
+  <section class="glass card offline" id="offline" hidden>
+    <div>
+      <h2>Not linked to ProxyPilot yet</h2>
+      <p class="hint" style="margin-bottom:0">In ProxyPilot, open <b>School ERP</b> and press <b>Try with a demo school</b>.</p>
     </div>
+    <a class="btn" href="/hod/erp">Open ProxyPilot</a>
+  </section>
 
-    <div style="display:grid; gap:16px; align-content:start">
-      <div class="card">
-        <h2>Today's substitutes</h2>
-        <p class="hint">Filled in by ProxyPilot's updates — the ERP timetable always shows who is taking each class.</p>
-        <div class="scroll"><table><thead><tr><th>Period</th><th>Class</th><th>Absent</th><th>Substitute</th></tr></thead><tbody id="covers"></tbody></table></div>
-      </div>
-      <div class="card">
-        <h2>Updates from ProxyPilot</h2>
-        <p class="hint">Every update arrives signed. The ERP checks the signature before trusting it.</p>
+  <div class="grid" id="grid">
+    <section class="glass card">
+      <div class="head"><span class="num">1</span><h2>Apply for leave</h2></div>
+      <p class="hint">Everything is filled in for a quick try. Just press the button.</p>
+      <form id="form">
+        <label class="f" for="teacher">Who is away?</label>
+        <select id="teacher" required></select>
+
+        <div class="two" style="margin-top:14px">
+          <div><label class="f" for="from">From</label><input type="date" id="from" required></div>
+          <div><label class="f" for="to">To <span style="color:var(--muted);font-weight:400">(optional)</span></label><input type="date" id="to"></div>
+        </div>
+
+        <label class="f">For</label>
+        <div class="seg" role="radiogroup">
+          <label><input type="radio" name="session" value="full" checked><span>Full day</span></label>
+          <label><input type="radio" name="session" value="morning"><span>Morning</span></label>
+          <label><input type="radio" name="session" value="afternoon"><span>Afternoon</span></label>
+        </div>
+
+        <label class="f" for="reason">Reason</label>
+        <input type="text" id="reason" maxlength="120" value="Fever, doctor advised rest">
+
+        <label class="f">Is it approved?</label>
+        <div class="choices" role="radiogroup">
+          <label class="choice"><input type="radio" name="approved" value="yes" checked><span><span>Yes, approved<small>ProxyPilot finds substitutes straight away.</small></span></span></label>
+          <label class="choice"><input type="radio" name="approved" value="no"><span><span>Not yet<small>The HOD approves it in ProxyPilot first.</small></span></span></label>
+        </div>
+
+        <button class="send" id="send" type="submit">Send leave</button>
+        <div class="msg" id="msg" role="status"></div>
+      </form>
+    </section>
+
+    <div class="col">
+      <section class="glass card">
+        <div class="head"><span class="num">2</span><h2>Today’s changes</h2></div>
+        <p class="hint">Who is taking each class today. This updates by itself.</p>
+        <div class="covers" id="covers"></div>
+      </section>
+
+      <section class="glass card">
+        <h2>Messages from ProxyPilot</h2>
+        <p class="hint">Each one is signed by ProxyPilot and checked here before it’s trusted.</p>
         <div class="feed" id="feed"></div>
-      </div>
+      </section>
+
+      <section class="glass card">
+        <h2>Leaves sent</h2>
+        <p class="hint">What this school sent to ProxyPilot.</p>
+        <div class="leaves" id="leaves"></div>
+      </section>
     </div>
   </div>
+
+  <footer id="foot"></footer>
 </main>
 
 <script>
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const TIMES = { 1: '9:00', 2: '9:50', 3: '11:00', 4: '11:50', 5: '1:30', 6: '2:20' };
+  const SESSION = { full: 'Full day', morning: 'Morning', afternoon: 'Afternoon' };
   const ago = (t) => {
     const s = Math.max(0, Math.round((Date.now() - new Date(t)) / 1000));
-    if (s < 60) return `${s}s ago`;
+    if (s < 60) return 'just now';
     if (s < 3600) return `${Math.round(s / 60)} min ago`;
     return new Date(t).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
   };
   const pretty = (d) => new Date(`${d}T00:00:00Z`).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' });
+  const plural = (n, one, many) => `${n} ${n === 1 ? one : many || one + 's'}`;
   let filled = false;
-  const SESSION = { full: 'Full day', morning: 'Morning', afternoon: 'Afternoon' };
+  let today = '';
+
+  // campus photo: morning light before 4 pm (India time), evening after
+  (() => {
+    const h = Number(new Date().toLocaleString('en-US', { hour: 'numeric', hour12: false, timeZone: 'Asia/Kolkata' }));
+    const img = $('bgimg');
+    img.onload = () => img.classList.add('on');
+    img.src = `/campus/stills/campus-${h >= 16 || h < 6 ? 'evening' : 'morning'}.jpg`;
+  })();
+
+  const LABEL = {
+    'cover.assigned': ['sage', 'Substitute confirmed'],
+    'cover.passed': ['brass', 'Asked the next teacher'],
+    'cover.failed': ['clay', 'No one free'],
+    'leave.approved': ['sage', 'Leave approved'],
+    'leave.declined': ['clay', 'Leave declined'],
+    ping: ['muted', 'Test message'],
+  };
+  const COLOR = { sage: 'var(--sage)', brass: 'var(--brass)', clay: 'var(--clay)', muted: 'var(--muted)' };
 
   function line(m) {
     const d = m.body?.data || {};
-    const who = (p) => (p?.name ? esc(p.name) : '—');
+    const who = (p) => (p?.name ? `<b>${esc(p.name)}</b>` : 'someone');
+    const where = `${esc(d.className)}, period ${d.period} (${pretty(d.date)})`;
     switch (m.event) {
-      case 'cover.assigned': return `<b>${who(d.substitute)}</b> will take ${esc(d.className)} · P${d.period} ${esc(d.subject)} on ${pretty(d.date)}, covering for ${who(d.absentTeacher)}.`;
-      case 'cover.passed': return `${esc(d.className)} · P${d.period} on ${pretty(d.date)} passed on — now asking <b>${who(d.askedNow)}</b>.`;
-      case 'cover.failed': return `Nobody could take ${esc(d.className)} · P${d.period} on ${pretty(d.date)}.`;
-      case 'leave.approved': return `Leave approved for <b>${who(d.teacher)}</b> (${(d.dates || []).map(pretty).join(', ')}). Finding cover for ${(d.classes || []).length} class${(d.classes || []).length === 1 ? '' : 'es'}.`;
-      case 'leave.declined': return `Leave declined for <b>${who(d.teacher)}</b> (${(d.dates || []).map(pretty).join(', ')}).${d.note ? ` ${esc(d.note)}` : ''}`;
-      case 'ping': return esc(d.message || 'Test message');
+      case 'cover.assigned': return `${who(d.substitute)} will take ${where}, covering for ${esc(d.absentTeacher?.name)}.`;
+      case 'cover.passed': return `${where} is now offered to ${who(d.askedNow)}.`;
+      case 'cover.failed': return `Nobody was free for ${where}.`;
+      case 'leave.approved': { const k = (d.classes || []).length; return `${who(d.teacher)}’s leave is approved (${(d.dates || []).map(pretty).join(', ')}). Finding substitutes for ${plural(k, 'class', 'classes')}.`; }
+      case 'leave.declined': return `${who(d.teacher)}’s leave was declined (${(d.dates || []).map(pretty).join(', ')}).${d.note ? ` Reason: ${esc(d.note)}` : ''}`;
+      case 'ping': return esc(d.message || 'A test message from ProxyPilot.');
       default: return esc(m.event);
     }
+  }
+
+  function coverRow(c) {
+    let right;
+    if (c.status === 'accepted') {
+      right = `<span class="pill p-ok">Covering ✓</span><div class="nm">${esc(c.substitute?.name)}</div>`;
+    } else if (c.status === 'uncovered') {
+      right = `<span class="pill p-no">No one free</span>`;
+    } else {
+      const p = c.askedNow;
+      right = `<span class="pill p-wait">Asking…</span><div class="nm">${esc(p?.name || '…')}</div>` +
+        (p?.erpId ? `<a class="as" href="/demo-erp/as/${encodeURIComponent(p.erpId)}" target="_blank" rel="noopener" title="Opens ProxyPilot as this teacher, so you can answer for her">Open as ${esc(p.name)} ↗</a>` : '');
+    }
+    return `<div class="cover">
+      <div class="per"><b>P${c.period}</b><span>${TIMES[c.period] || ''}</span></div>
+      <div><div class="cls">${esc(c.className)} · ${esc(c.subject)}</div><div class="away">${esc(c.absentTeacher?.name)} is away</div></div>
+      <div class="who">${right}</div>
+    </div>`;
+  }
+
+  function leaveRow(l, teachers) {
+    const t = teachers.find((x) => x.erpId === l.teacher_erp_id);
+    const dates = l.end_date && l.end_date !== l.date ? `${pretty(l.date)} – ${pretty(l.end_date)}` : pretty(l.date);
+    const st = l.proxypilot_status;
+    const pill = st === 'approved' ? ['p-ok', 'Approved'] : st === 'declined' || st === 'rejected' ? ['p-no', 'Declined'] : st === 'pending' ? ['p-wait', 'Waiting for HOD'] : st === 'no-classes' ? ['p-mute', 'No classes'] : ['p-mute', esc(st)];
+    return `<div class="leave"><div><div>${esc(t?.name || l.teacher_erp_id)}</div><div class="when">${dates} · ${esc(SESSION[l.session] || l.session)}</div></div><span class="pill ${pill[0]}">${pill[1]}</span></div>`;
   }
 
   async function load() {
     let s;
     try { s = await fetch('/demo-erp/api/state').then((r) => r.json()); } catch { return; }
-    $('status').innerHTML = s.connected
-      ? `<span class="dot on"></span><span>Connected to <b>ProxyPilot</b> at <code>${esc(s.proxypilotUrl)}</code></span>`
-      : `<span class="dot"></span><span>Not connected. In ProxyPilot, log in as the HOD → <b>School ERP</b> → <b>Connect the demo ERP</b>.</span>`;
+    today = s.today;
+    $('link').innerHTML = s.connected ? '<span class="dot on"></span>Linked to ProxyPilot' : '<span class="dot"></span>Not linked';
+    $('offline').hidden = s.connected;
+    $('grid').hidden = !s.connected;
     $('send').disabled = !s.connected;
-    $('stats').innerHTML = [['Teachers', s.school.teachers], ['Students', s.school.students], ['Classes', s.school.classes], ['Periods a week', s.school.periods]]
-      .map(([k, v]) => `<div><b>${v}</b>${k}</div>`).join('');
+    $('foot').innerHTML = `Shared with ProxyPilot: ${plural(s.school.teachers, 'teacher')} · ${plural(s.school.classes, 'class', 'classes')} · ${s.school.periods} periods a week &nbsp;·&nbsp; <a href="/hod/erp">Back to ProxyPilot</a>`;
 
-    if (!filled) {
-      $('teacher').innerHTML = s.teachers.map((t) => `<option value="${esc(t.erpId)}">${esc(t.name)} — ${esc(t.subjects.join(', '))} (${esc(t.erpId)})</option>`).join('');
+    if (!filled && s.teachers.length) {
+      $('teacher').innerHTML = s.teachers.map((t) => `<option value="${esc(t.erpId)}">${esc(t.name)} · ${esc(t.subjects.join(', '))}</option>`).join('');
       $('from').value = s.today;
       $('from').min = s.today;
       $('to').min = s.today;
       filled = true;
     }
 
-    $('leaves').innerHTML = s.leaves.length
-      ? s.leaves.map((l) => {
-          const t = s.teachers.find((x) => x.erpId === l.teacher_erp_id);
-          const dates = l.end_date && l.end_date !== l.date ? `${pretty(l.date)} – ${pretty(l.end_date)}` : pretty(l.date);
-          return `<tr><td><code>${esc(l.ref)}</code></td><td>${esc(t?.name || l.teacher_erp_id)}</td><td>${dates}<div style="color:var(--muted);font-size:12px">${esc(SESSION[l.session] || l.session)}${l.approved_in_erp ? ' · approved in the ERP' : ' · sent to the HOD'}</div></td><td><span class="pill ${l.proxypilot_status === 'approved' ? 'p-accepted' : l.proxypilot_status === 'declined' || l.proxypilot_status === 'rejected' ? 'p-uncovered' : 'p-pending'}">${esc(l.proxypilot_status === 'pending' ? 'waiting for HOD' : l.proxypilot_status)}</span></td></tr>`;
-        }).join('')
-      : `<tr><td colspan="4"><div class="empty">No leaves sent yet.</div></td></tr>`;
-
     $('covers').innerHTML = s.todayCovers.length
-      ? s.todayCovers.map((c) => {
-          const sub = c.status === 'accepted' ? `<b>${esc(c.substitute?.name)}</b> <span class="pill p-accepted">covered</span>`
-            : c.status === 'uncovered' ? `<span class="pill p-uncovered">not covered</span>`
-            : `asking ${esc(c.askedNow?.name || '…')} <span class="pill p-pending">waiting</span>`;
-          return `<tr><td>P${c.period}${c.time ? `<div style="color:var(--muted);font-size:12px">${esc(c.time)}</div>` : ''}</td><td>${esc(c.className)}<div style="color:var(--muted);font-size:12px">${esc(c.subject)}</div></td><td>${esc(c.absentTeacher?.name)}</td><td>${sub}</td></tr>`;
-        }).join('')
-      : `<tr><td colspan="4"><div class="empty">No teacher is away today.</div></td></tr>`;
+      ? s.todayCovers.map(coverRow).join('')
+      : `<div class="empty">No teacher is away today.<br>Send a leave on the left and watch this fill in.</div>`;
 
     $('feed').innerHTML = s.inbox.length
-      ? s.inbox.map((m) => `
-        <div class="item">
-          <div class="top"><span class="tag t-${esc(m.event.replace('.', '-'))}">${esc(m.event)}</span><span class="when">${ago(m.received_at)}</span></div>
-          <div class="text">${line(m)}</div>
-          <div class="ver ${m.verified ? 'ok' : 'no'}">${m.verified ? '✓ Signature verified' : '✗ Signature did not match — ignored'}</div>
-        </div>`).join('')
-      : `<div class="empty">No updates yet. Apply for a leave, or approve one in ProxyPilot.</div>`;
+      ? s.inbox.map((m) => {
+          const [tone, label] = LABEL[m.event] || ['muted', m.event];
+          return `<div class="item"><span class="d" style="background:${COLOR[tone]}"></span><div>
+            <div class="t">${line(m)}</div>
+            <div class="m">${esc(label)} · ${ago(m.received_at)} · ${m.verified ? '<span class="ok-c">✓ checked</span>' : '<span class="no-c">✗ failed the check, ignored</span>'}</div>
+          </div></div>`;
+        }).join('')
+      : `<div class="empty">No messages yet.</div>`;
+
+    $('leaves').innerHTML = s.leaves.length ? s.leaves.map((l) => leaveRow(l, s.teachers)).join('') : `<div class="empty">Nothing sent yet.</div>`;
   }
 
   $('form').addEventListener('submit', async (e) => {
@@ -213,31 +327,40 @@
     const msg = $('msg');
     msg.className = 'msg';
     $('send').disabled = true;
+    $('send').textContent = 'Sending…';
+    const approved = document.querySelector('input[name=approved]:checked').value === 'yes';
+    const from = $('from').value;
     try {
       const r = await fetch('/demo-erp/api/apply-leave', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          teacherErpId: $('teacher').value, date: $('from').value, endDate: $('to').value || $('from').value,
-          session: $('session').value, reason: $('reason').value, approvedInErp: $('approved').checked,
+          teacherErpId: $('teacher').value, date: from, endDate: $('to').value || from,
+          session: document.querySelector('input[name=session]:checked').value, reason: $('reason').value, approvedInErp: approved,
         }),
       });
       const j = await r.json();
+      const p = j.proxypilot || {};
       if (j.ok) {
-        const covers = j.proxypilot?.covers?.length || 0;
-        msg.textContent = j.proxypilot?.status === 'no-classes'
-          ? `${j.ref}: ${j.proxypilot.message}`
-          : `${j.ref} sent. ProxyPilot: ${j.proxypilot?.status || 'received'}${covers ? ` — finding substitutes for ${covers} class${covers === 1 ? '' : 'es'}` : ''}.`;
+        const k = p.covers?.length || 0;
+        msg.textContent = p.status === 'no-classes'
+          ? (p.message || 'No classes then, so nothing to cover.')
+          : p.status === 'pending'
+            ? 'Sent. The HOD will see it in ProxyPilot, and substitutes are found as soon as it’s approved.'
+            : k
+              ? `Sent. ProxyPilot is finding substitutes for ${plural(k, 'class', 'classes')}${from === today ? '. See “Today’s changes”.' : ` on ${pretty(from)}.`}`
+              : 'Sent to ProxyPilot.';
         msg.className = 'msg ok';
       } else {
-        msg.textContent = `Not sent: ${j.proxypilot?.error || j.error || 'ProxyPilot refused it'}`;
+        msg.textContent = `Not sent: ${p.error || j.error || 'ProxyPilot refused it'}`;
         msg.className = 'msg err';
       }
     } catch {
-      msg.textContent = 'Could not reach the ERP server.';
+      msg.textContent = 'Could not reach the server. Please try again.';
       msg.className = 'msg err';
     }
     $('send').disabled = false;
+    $('send').textContent = 'Send leave';
     load();
   });
 

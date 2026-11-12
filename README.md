@@ -16,9 +16,9 @@ This is the **ERP edition** of [ProxyPilot](https://github.com/krishnachampreddy
 - **ERP API** (`/api/v1`) — the ERP sends teachers, students, the weekly timetable and leaves, with an API key the HOD creates.
 - **Leaves from the ERP** — already approved there? Cover starts at once. Not yet? It waits for the HOD in ProxyPilot.
 - **Signed webhooks** — every leave decision and cover change goes back to the ERP, HMAC-SHA256 signed, with retries.
-- **Sync now** — or ProxyPilot reads the staff and timetable from the ERP's own API.
+- **Get latest** — or ProxyPilot reads the staff and timetable from the ERP's own API.
 - **School ERP page** for the HOD — connect, create keys, sync, and an activity log of every message in and out.
-- **Demo School ERP** at `/demo-erp` — a stand-in ERP to show the whole thing working without a partner's API access. One click: *School ERP → Connect the demo ERP*.
+- **Demo School ERP** at `/demo-erp` — a stand-in ERP to show the whole thing working without a partner's API access. One click: *School ERP → Try with a demo school*.
 
 Guide for ERP developers: **[docs/ERP-API.md](docs/ERP-API.md)**.
 
@@ -26,7 +26,7 @@ Guide for ERP developers: **[docs/ERP-API.md](docs/ERP-API.md)**.
 
 1. **Database:** create a free Postgres at [neon.com](https://neon.com) and copy its connection string (`postgresql://…`).
 2. **Render:** New → Blueprint → pick this repo (it reads `render.yaml`). Paste the Neon string as `DATABASE_URL` when asked; add `GEMINI_API_KEY` / email keys if you use them.
-3. Open the site, log in as the HOD (`hod@college.edu` / `demo123`), go to **School ERP → Connect the demo ERP**.
+3. Open the site, log in as the HOD (`hod@college.edu` / `demo123`), go to **School ERP → Try with a demo school**.
 
 Each ProxyPilot site serves one school, so schools' data never mix.
 

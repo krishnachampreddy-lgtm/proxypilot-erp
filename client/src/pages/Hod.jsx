@@ -143,16 +143,16 @@ function ErpCard() {
   return (
     <Card
       title="School ERP"
-      subtitle={c.connected ? `Connected to ${c.erpName || 'your ERP'}` : 'ProxyPilot can work inside your school’s ERP'}
+      subtitle={c.connected ? `Linked to ${c.erpName || 'your school ERP'}` : 'Link the software your school already uses'}
       right={<span className={`mt-2 h-2.5 w-2.5 shrink-0 rounded-full ${c.connected ? 'bg-sage shadow-[0_0_10px_2px_rgba(98,211,155,0.5)]' : 'bg-muted'}`} />}
     >
-      {c.connected && c.lastSync && (
-        <p className="mb-3 text-sm text-ink/80">
-          {c.lastSync.teachers} teachers · {c.lastSync.periods} periods synced
-        </p>
-      )}
+      <p className="mb-3 text-sm text-ink/80">
+        {c.connected
+          ? 'Leaves come in from it by itself, and it always shows who is covering.'
+          : 'Leaves come in by themselves, and its timetable shows who is covering.'}
+      </p>
       <Link to="/hod/erp" className="inline-block rounded-[11px] border border-line bg-white px-4 py-2 text-sm font-semibold text-ink transition hover:border-brass/60">
-        {c.connected ? 'Manage connection' : 'Connect your ERP'}
+        {c.connected ? 'Open School ERP' : 'See how it works'}
       </Link>
     </Card>
   );

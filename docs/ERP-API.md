@@ -11,21 +11,21 @@ ProxyPilot plugs into a school's ERP (Teachmint, Entab CampusCare, Fedena, MyCla
 
 There are two ways for data to come in, and the ERP can use either or both:
 
-| | ERP pushes (recommended) | ProxyPilot pulls ("Sync now") |
+| | ERP pushes (recommended) | ProxyPilot pulls ("Get latest") |
 | --- | --- | --- |
-| How | The ERP calls `PUT /api/v1/teachers`, `/students`, `/timetable` whenever its data changes | The HOD presses **Sync now**; ProxyPilot calls `GET {erp}/teachers`, `/students`, `/timetable` |
+| How | The ERP calls `PUT /api/v1/teachers`, `/students`, `/timetable` whenever its data changes | The HOD presses **Get latest**; ProxyPilot calls `GET {erp}/teachers`, `/students`, `/timetable` |
 | The ERP needs | ProxyPilot's API key | An API that returns the formats below |
 
 Leaves always come in through `POST /api/v1/leaves`. Updates always go out as webhooks.
 
 ## 1. Getting the keys
 
-The school's HOD opens **ProxyPilot → School ERP** and:
+The school’s HOD opens **ProxyPilot → School ERP → Technical setup** and:
 
 1. Copies the **ProxyPilot API address**, for example `https://proxypilot-erp.onrender.com/api/v1`.
 2. Presses **Create API key**. The key, `pp_live_…`, is shown once. Making a new key switches the old one off at once.
 3. Enters the ERP's **webhook address**, which must be `https://`, and presses **Create secret**. The secret, `whsec_…`, is shown once.
-4. For "Sync now" only: enters the ERP's API address and key.
+4. For "Get latest" only: enters the ERP's API address and key.
 
 ProxyPilot stores only a fingerprint (hash) of the API key. It stores the webhook secret and the ERP's key encrypted.
 
@@ -238,7 +238,7 @@ def is_from_proxypilot(raw_body: bytes, headers, secret: str) -> bool:
 
 Use the **raw** request body exactly as it arrived, not one re-encoded after parsing.
 
-## 4. Reading from the ERP: "Sync now"
+## 4. Reading from the ERP: "Get latest"
 
 If the ERP offers an API, ProxyPilot can read from it. It sends `Authorization: Bearer <the ERP's key>` with three calls:
 
@@ -254,9 +254,10 @@ If an ERP's own API returns other shapes, a small adapter maps them. The adapter
 
 ProxyPilot ships with a **Demo School ERP** at `/demo-erp`. To use it:
 
-1. In **School ERP**, press **Connect the demo ERP**. Both sides are set up and a first sync runs.
-2. In the demo ERP, apply for a leave. It goes to ProxyPilot's API.
-3. When teachers accept or decline in ProxyPilot, the demo ERP receives signed webhooks and shows today's substitutes.
+1. In **School ERP**, press **Try with a demo school**. Both sides are set up and a first sync runs.
+2. In the demo ERP, send a leave. It goes to ProxyPilot's API.
+3. Next to each class in **Today's changes**, press **Open as …** to open ProxyPilot as the teacher who was asked, and accept or decline. This only works for the built-in demo teachers.
+4. The demo ERP receives signed webhooks and shows today's substitutes.
 
 The demo ERP only answers while ProxyPilot is connected to it.
 

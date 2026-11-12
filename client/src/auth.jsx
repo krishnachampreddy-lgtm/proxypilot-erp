@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import api from './api';
 
 const AuthContext = createContext(null);
@@ -29,6 +29,16 @@ export function AuthProvider({ children }) {
     }
   });
   const [saved, setSaved] = useState(readSaved);
+
+  // Signed in as someone else in another tab (e.g. the demo ERP's "Open as" button):
+  // follow along here too, instead of showing one person's screen with another's session.
+  useEffect(() => {
+    const onStorage = (e) => {
+      if (e.key === 'pp_user' && e.newValue !== e.oldValue) window.location.reload();
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
 
   const remember = (u, token) => {
     if (u.email.endsWith('@college.edu')) return; // don't remember demo accounts
